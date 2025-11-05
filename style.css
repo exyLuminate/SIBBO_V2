@@ -249,3 +249,75 @@ body {
     border-radius: 4px;
     margin-bottom: 1rem;
 }
+
+
+/* --- Styling Halaman Kasir --- */
+.kasir-container {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.daftar-barang {
+    flex: 2; /* 2/3 layar */
+}
+
+.keranjang {
+    flex: 1; /* 1/3 layar */
+    position: sticky;
+    top: 1.5rem; /* Biar keranjang tetap di atas saat di-scroll */
+}
+
+/* Biar card-body di daftar barang bisa di-scroll jika panjang */
+.daftar-barang .card-body {
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.table-stripe tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* Tombol + / - di keranjang */
+.btn-qty, .btn-qty-danger {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #eee;
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+}
+.btn-qty:hover {
+    background-color: #ddd;
+}
+.btn-qty-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.btn-qty-danger:hover {
+    background-color: #f5c6cb;
+}
+
+/* Total Belanja */
+#total-belanja {
+    color: #007bff;
+    margin-bottom: 1rem;
+    text-align: right;
+}
