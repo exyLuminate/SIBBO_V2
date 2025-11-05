@@ -1,0 +1,96 @@
+CREATE TABLE peran (
+    id_peran BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nama_peran VARCHAR(50) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL
+) 
+
+CREATE TABLE pengguna (
+    id_pengguna BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_peran BIGINT NOT NULL,
+    nama_lengkap VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (id_peran) REFERENCES peran(id_peran)
+) 
+
+CREATE TABLE kategori (
+    id_kategori BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nama_kategori VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL
+) 
+
+CREATE TABLE barang (
+    id_barang BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_kategori BIGINT NOT NULL,
+    kode_sku VARCHAR(100) UNIQUE NULL DEFAULT NULL,
+    nama_barang VARCHAR(150) NOT NULL,
+    deskripsi TEXT NULL DEFAULT NULL,
+    harga_jual DECIMAL(10, 2) NOT NULL,
+    stok INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (id_kategori) REFERENCES kategori(id_kategori)
+)
+
+CREATE TABLE metodepembayaran (
+    id_metode BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nama_metode VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL
+) 
+
+CREATE TABLE transaksi (
+    id_transaksi BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_pengguna BIGINT NOT NULL,
+    id_metode BIGINT NOT NULL,
+    nomor_invoice VARCHAR(50) NOT NULL UNIQUE,
+    tanggal DATETIME NOT NULL,
+    total_harga DECIMAL(12, 2) NOT NULL,
+    jumlah_bayar DECIMAL(12, 2) NOT NULL,
+    kembalian DECIMAL(12, 2) NOT NULL,
+    status ENUM('selesai', 'dibatalkan') NOT NULL DEFAULT 'selesai',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna),
+    FOREIGN KEY (id_metode) REFERENCES metodepembayaran(id_metode)
+) 
+
+CREATE TABLE detailtransaksi (
+    id_detail BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_transaksi BIGINT NOT NULL,
+    id_barang BIGINT NOT NULL,
+    harga_saat_transaksi DECIMAL(10, 2) NOT NULL,
+    jumlah INT NOT NULL,
+    subtotal DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (id_transaksi) REFERENCES transaksi(id_transaksi) ON DELETE CASCADE,
+    FOREIGN KEY (id_barang) REFERENCES barang(id_barang)
+) 
+
+CREATE TABLE stok_masuk (
+    id_stok_masuk BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_barang BIGINT NOT NULL,
+    id_pengguna BIGINT NOT NULL,
+    jumlah_masuk INT NOT NULL,
+    tanggal_masuk DATETIME NOT NULL,
+    catatan TEXT NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (id_barang) REFERENCES barang(id_barang),
+    FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna)
+) 
+
+
