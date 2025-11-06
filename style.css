@@ -360,3 +360,15 @@ body {
     height: 400px;
     width: 100%;
 }
+
+/* Style baru untuk input pencarian di form admin */
+.form-control-search {
+    flex-grow: 1; /* Ini akan membuat input mengisi sisa ruang */
+    
+    /* Kita salin style dari .form-group input agar tampilannya sama */
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-bottom: 15px ;
+}

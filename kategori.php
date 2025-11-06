@@ -10,6 +10,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['role'] != 'Admin') {
 // --- BATAS AKHIR PENJAGA HALAMAN ---
 
 
+// [MODIFIKASI 1] Ambil kata kunci pencarian dari URL
+$search = $_GET['search'] ?? ''; // Jika tidak ada, pakai string kosong
+$search_param = "%" . $search . "%"; // Siapkan parameter untuk query LIKE
+
+
 $judul_halaman = "Manajemen Kategori";
 include 'templates/header.php';
 ?>
@@ -42,11 +47,22 @@ if (isset($_SESSION['error'])) {
     </div>
 </div>
 
-<div class="card">
+<div class="card" style="margin-top: 1.5rem;">
     <div class="card-header">
         <h3>Daftar Kategori</h3>
     </div>
     <div class="card-body">
+    
+     <form action="kategori.php" method="GET" class="search-form">
+    <input type="text" name="search" 
+           placeholder="Cari Nama Kategori..." 
+           value="<?php echo htmlspecialchars($search); ?>"
+           class="form-control-search"> <button type="submit" class="btn btn-primary">Cari</button>
+    <?php if (!empty($search)): ?>
+        <a href="kategori.php" class="btn btn-secondary">Reset</a>
+    <?php endif; ?>
+</form>
+
         <table class="table">
             <thead>
                 <tr>
@@ -57,9 +73,26 @@ if (isset($_SESSION['error'])) {
             </thead>
             <tbody>
                 <?php
-                // Ambil data kategori yang TIDAK di-soft-delete
-                $sql = "SELECT id_kategori, nama_kategori FROM kategori WHERE deleted_at IS NULL ORDER BY nama_kategori ASC";
-                $result = mysqli_query($koneksi, $sql);
+                // [MODIFIKASI 3] Ubah Query SQL untuk menangani pencarian
+                
+                $sql = "SELECT id_kategori, nama_kategori FROM kategori WHERE deleted_at IS NULL";
+
+                // Tambahkan kondisi WHERE jika ada pencarian
+                if (!empty($search)) {
+                    $sql .= " AND (nama_kategori LIKE ?)";
+                }
+
+                $sql .= " ORDER BY nama_kategori ASC";
+
+                $stmt = mysqli_prepare($koneksi, $sql);
+
+                if (!empty($search)) {
+                    // Bind 1 parameter string ("s")
+                    mysqli_stmt_bind_param($stmt, "s", $search_param);
+                }
+
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
 
                 if (mysqli_num_rows($result) > 0) {
                     while($row = mysqli_fetch_assoc($result)) {
@@ -80,7 +113,12 @@ if (isset($_SESSION['error'])) {
                 <?php
                     }
                 } else {
-                    echo "<tr><td colspan='3' style='text-align:center;'>Belum ada data kategori.</td></tr>";
+                    // [MODIFIKASI 4] Tampilkan pesan yang lebih relevan
+                    if (!empty($search)) {
+                        echo "<tr><td colspan='3' style='text-align:center;'>Kategori tidak ditemukan untuk: '" . htmlspecialchars($search) . "'</td></tr>";
+                    } else {
+                        echo "<tr><td colspan='3' style='text-align:center;'>Belum ada data kategori.</td></tr>";
+                    }
                 }
                 ?>
             </tbody>
