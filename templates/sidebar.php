@@ -1,6 +1,6 @@
 <nav class="sidebar">
     <div class="sidebar-header">
-        <h3>SIBBO POS</h3>
+        <h3>SIBBO</h3>
     </div>
     <ul class="nav-menu">
         <li>

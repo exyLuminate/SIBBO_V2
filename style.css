@@ -103,7 +103,12 @@ body {
 .main-content {
     margin-left: 250px;
     padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
+
+
 .main-content header {
     background: #fff;
     padding: 1rem;
@@ -114,16 +119,12 @@ body {
     justify-content: space-between;
     align-items: center;
 }
-.main-content main {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    min-height: 70vh;
-}
+
 .main-content footer {
     text-align: center;
     margin-top: 1.5rem;
     color: #777;
+    margin-top: auto;
 }
 
 /* --- Styling Kategori --- */
