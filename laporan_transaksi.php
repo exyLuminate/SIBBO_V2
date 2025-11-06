@@ -10,11 +10,39 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['role'] != 'Admin') {
 // --- BATAS AKHIR PENJAGA HALAMAN ---
 
 
+// [MODIFIKASI 1] Ambil tanggal dari URL, jika tidak ada, pakai tanggal hari ini
+$tgl_mulai = $_GET['tgl_mulai'] ?? date('Y-m-d');
+$tgl_selesai = $_GET['tgl_selesai'] ?? date('Y-m-d');
+
+
 $judul_halaman = "Laporan Penjualan";
 include 'templates/header.php';
 ?>
 
 <div class="card">
+    <div class="card-header">
+        <h3>Filter Laporan</h3>
+    </div>
+    <div class="card-body">
+        <form action="laporan_transaksi.php" method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="tgl_mulai">Dari Tanggal</label>
+                <input type="date" id="tgl_mulai" name="tgl_mulai" 
+                       value="<?php echo htmlspecialchars($tgl_mulai); ?>" class="form-control-search">
+            </div>
+            <div class="form-group">
+                <label for="tgl_selesai">Sampai Tanggal</label>
+                <input type="date" id="tgl_selesai" name="tgl_selesai"
+                       value="<?php echo htmlspecialchars($tgl_selesai); ?>" class="form-control-search">
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="laporan_transaksi.php" class="btn btn-secondary">Reset (Hari Ini)</a>
+        </form>
+    </div>
+</div>
+
+
+<div class="card" style="margin-top: 1.5rem;">
     <div class="card-header">
         <h3>Riwayat Transaksi</h3>
     </div>
@@ -32,7 +60,12 @@ include 'templates/header.php';
             </thead>
             <tbody>
                 <?php
-                // Query JOIN 3 tabel: transaksi, pengguna, metodepembayaran
+                // [MODIFIKASI 3] Ubah Query SQL untuk menangani filter tanggal
+                
+                // Penting: tambahkan jam 23:59:59 ke tanggal selesai
+                // agar transaksi di tanggal itu ikut terambil
+                $tgl_selesai_end = $tgl_selesai . ' 23:59:59';
+                
                 $sql = "SELECT 
                             transaksi.id_transaksi, 
                             transaksi.tanggal, 
@@ -48,11 +81,17 @@ include 'templates/header.php';
                             metodepembayaran ON transaksi.id_metode = metodepembayaran.id_metode
                         WHERE 
                             transaksi.status = 'selesai' AND transaksi.deleted_at IS NULL
+                            AND (transaksi.tanggal BETWEEN ? AND ?) -- Tambah filter tanggal
                         ORDER BY 
-                            transaksi.tanggal DESC
-                        LIMIT 100"; // Tampilkan 100 transaksi terbaru
+                            transaksi.tanggal DESC";
                 
-                $result = mysqli_query($koneksi, $sql);
+                // Hapus LIMIT 100 agar semua hasil filter tampil
+                
+                $stmt = mysqli_prepare($koneksi, $sql);
+                // Bind 2 parameter string (s, s)
+                mysqli_stmt_bind_param($stmt, "ss", $tgl_mulai, $tgl_selesai_end);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
 
                 if (mysqli_num_rows($result) > 0) {
                     while($row = mysqli_fetch_assoc($result)) {
@@ -70,7 +109,9 @@ include 'templates/header.php';
                 <?php
                     }
                 } else {
-                    echo "<tr><td colspan='6' style='text-align:center;'>Belum ada data transaksi.</td></tr>";
+                    // [MODIFIKASI 4] Tampilkan pesan yang lebih relevan
+                    echo "<tr><td colspan='6' style='text-align:center;'>Tidak ada data transaksi pada periode "
+                         . htmlspecialchars($tgl_mulai) . " s/d " . htmlspecialchars($tgl_selesai) . ".</td></tr>";
                 }
                 ?>
             </tbody>
