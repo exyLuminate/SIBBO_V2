@@ -40,6 +40,12 @@ if (isset($_SESSION['error'])) {
         <div class="card">
             <div class="card-header">
                 <h3>Daftar Barang</h3>
+                
+                <div class="form-group" style="margin-bottom: 0; margin-top: 1rem;">
+                    <input type="text" id="searchInput" placeholder="Ketik untuk mencari nama barang..." 
+                           style="width: 100%; padding: 0.5rem;" autocomplete="off">
+                </div>
+                
             </div>
             <div class="card-body">
                 <table class="table table-stripe">
@@ -51,7 +57,8 @@ if (isset($_SESSION['error'])) {
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    
+                    <tbody id="daftarBarangTbody"> 
                         <?php while($barang = mysqli_fetch_assoc($barang_result)): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($barang['nama_barang']); ?></td>
@@ -175,6 +182,36 @@ if (isset($_SESSION['error'])) {
     </div>
 
 </div>
+
+<script>
+// Ambil elemen input dan tabel
+const searchInput = document.getElementById('searchInput');
+const tableBody = document.getElementById('daftarBarangTbody');
+const rows = tableBody.getElementsByTagName('tr');
+
+// Tambahkan event listener 'keyup' (setiap kali tombol dilepas)
+searchInput.addEventListener('keyup', function() {
+    const filter = searchInput.value.toLowerCase(); // Ambil teks pencarian, ubah jadi huruf kecil
+
+    // Loop semua baris tabel (tr)
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        // Ambil semua sel (td) di dalam baris
+        const cells = row.getElementsByTagName('td');
+        
+        // Ambil teks dari kolom pertama (Nama Barang [indeks 0])
+        const namaBarang = cells[0].textContent || cells[0].innerText;
+        
+        // Cek apakah nama barang mengandung teks pencarian
+        if (namaBarang.toLowerCase().indexOf(filter) > -1) {
+            row.style.display = ""; // Tampilkan baris
+        } else {
+            row.style.display = "none"; // Sembunyikan baris
+        }
+    }
+});
+</script>
+
 
 <?php
 include 'templates/footer.php';
