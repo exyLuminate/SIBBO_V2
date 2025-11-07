@@ -94,3 +94,11 @@ CREATE TABLE stok_masuk (
 ) 
 
 
+-- 2. Seeding Data Awal
+INSERT INTO peran (id_peran, nama_peran) VALUES (1, 'Admin'), (2, 'Kasir');
+INSERT INTO metodepembayaran (nama_metode) VALUES ('Tunai'), ('QRIS'), ('Debit');
+
+-- Password default: admin123 dan kasir123
+INSERT INTO pengguna (id_peran, nama_lengkap, username, password_hash) VALUES
+(1, 'Administrator', 'admin', '$2y$10$fdyAC.q.54s29s9.Wq/VpOFvjE.5dJbUcf05iA7aFq39u1gq7w.s2'),
+(2, 'Kasir Toko', 'kasir', '$2y$10$wO/G4h.W.l.k.Q.c.i.q.b.u.i.R.T.y.W.a.q.O.X.I.k');
