@@ -1,24 +1,24 @@
-SIBBO (Sistem Informasi Belanja Berbasis Online)
+# SIBBO (Sistem Informasi Belanja Berbasis Online)
 
-# SIBBO adalah aplikasi Sistem Kasir (Point of Sale - POS) berbasis web sederhana namun fungsional yang dibangun menggunakan PHP Native. Aplikasi ini dirancang untuk membantu usaha kecil menengah dalam mencatat transaksi penjualan, mengelola stok barang, dan melihat laporan pendapatan.
+SIBBO adalah aplikasi Sistem Kasir (Point of Sale - POS) berbasis web sederhana namun fungsional yang dibangun menggunakan PHP Native. Aplikasi ini dirancang untuk membantu usaha kecil menengah dalam mencatat transaksi penjualan, mengelola stok barang, dan melihat laporan pendapatan.
 
 ## 🌟 Fitur Utama
-## Multi-Role User: Mendukung peran Admin (akses penuh) dan Kasir (terbatas pada penjualan).
+Multi-Role User: Mendukung peran Admin (akses penuh) dan Kasir (terbatas pada penjualan).
 
-## Dashboard Admin: Ringkasan statistik penjualan harian, total stok, dan grafik barang terlaris.
+Dashboard Admin: Ringkasan statistik penjualan harian, total stok, dan grafik barang terlaris.
 
-## Manajemen Master Data: CRUD (Create, Read, Update, Delete) untuk Barang, Kategori, dan Pengguna.
+Manajemen Master Data: CRUD (Create, Read, Update, Delete) untuk Barang, Kategori, dan Pengguna.
 
-## Manajemen Stok: Pencatatan riwayat stok masuk (kulakan) yang otomatis menambah stok barang.
+Manajemen Stok: Pencatatan riwayat stok masuk (kulakan) yang otomatis menambah stok barang.
 
-## Halaman Kasir (POS) Interaktif:
+Halaman Kasir (POS) Interaktif:
 Pencarian barang instan (tanpa reload).
 Keranjang belanja berbasis sesi.
 Perhitungan subtotal dan kembalian otomatis.
 
-## Laporan Transaksi: Melihat riwayat penjualan dengan filter rentang tanggal dan detail struk per transaksi.
+Laporan Transaksi: Melihat riwayat penjualan dengan filter rentang tanggal dan detail struk per transaksi.
 
-## Keamanan: Password hashing (Bcrypt) dan proteksi halaman berbasis sesi.
+Keamanan: Password hashing (Bcrypt) dan proteksi halaman berbasis sesi.
 
 ### 🛠️ Teknologi yang Digunakan
 Bahasa: PHP (Native)
@@ -63,5 +63,5 @@ $db_name = 'sibbo';
 Buka browser dan akses: http://localhost/sibbo (atau http://sibbo.test jika menggunakan Laragon).
 
 Akun Default
-Role : Admin, Username : admin, password : admin123
-Role : Kasir, Username : kasir, password : kasir123
+Role : Admin, Username : admin, password : admin123.
+Role : Kasir, Username : kasir, password : kasir123.
