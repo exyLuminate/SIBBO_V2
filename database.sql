@@ -4,7 +4,7 @@ CREATE TABLE peran (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL
-) 
+);
 
 CREATE TABLE pengguna (
     id_pengguna BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -16,7 +16,7 @@ CREATE TABLE pengguna (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (id_peran) REFERENCES peran(id_peran)
-) 
+);
 
 CREATE TABLE kategori (
     id_kategori BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -24,7 +24,7 @@ CREATE TABLE kategori (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL
-) 
+);
 
 CREATE TABLE barang (
     id_barang BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +38,7 @@ CREATE TABLE barang (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (id_kategori) REFERENCES kategori(id_kategori)
-)
+);
 
 CREATE TABLE metodepembayaran (
     id_metode BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -46,7 +46,7 @@ CREATE TABLE metodepembayaran (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL
-) 
+);
 
 CREATE TABLE transaksi (
     id_transaksi BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -63,7 +63,7 @@ CREATE TABLE transaksi (
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna),
     FOREIGN KEY (id_metode) REFERENCES metodepembayaran(id_metode)
-) 
+);
 
 CREATE TABLE detailtransaksi (
     id_detail BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -77,7 +77,7 @@ CREATE TABLE detailtransaksi (
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (id_transaksi) REFERENCES transaksi(id_transaksi) ON DELETE CASCADE,
     FOREIGN KEY (id_barang) REFERENCES barang(id_barang)
-) 
+);
 
 CREATE TABLE stok_masuk (
     id_stok_masuk BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -91,7 +91,7 @@ CREATE TABLE stok_masuk (
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (id_barang) REFERENCES barang(id_barang),
     FOREIGN KEY (id_pengguna) REFERENCES pengguna(id_pengguna)
-) 
+);
 
 
 -- 2. Seeding Data Awal
@@ -100,5 +100,5 @@ INSERT INTO metodepembayaran (nama_metode) VALUES ('Tunai'), ('QRIS'), ('Debit')
 
 -- Password default: admin123 dan kasir123
 INSERT INTO pengguna (id_peran, nama_lengkap, username, password_hash) VALUES
-(1, 'Administrator', 'admin', '$2y$10$fdyAC.q.54s29s9.Wq/VpOFvjE.5dJbUcf05iA7aFq39u1gq7w.s2'),
-(2, 'Kasir Toko', 'kasir', '$2y$10$wO/G4h.W.l.k.Q.c.i.q.b.u.i.R.T.y.W.a.q.O.X.I.k');
+(1, 'Administrator', 'admin', '$2y$10$4NlI5lPUjq1X/mYGqRLwguZC70TKQbRZg5L.XexjlG8kpNVbKTEXG'),
+(2, 'Kasir Toko', 'kasir', '$2y$10$WfhTCX1/QAlQ31T1625qOeYnMSwYSIaRUv9tMcbaTkzICweJB2Vjm');

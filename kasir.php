@@ -190,26 +190,41 @@ const tableBody = document.getElementById('daftarBarangTbody');
 const rows = tableBody.getElementsByTagName('tr');
 
 // Tambahkan event listener 'keyup' (setiap kali tombol dilepas)
-searchInput.addEventListener('keyup', function() {
-    const filter = searchInput.value.toLowerCase(); // Ambil teks pencarian, ubah jadi huruf kecil
+if (searchInput && rows) {
+    searchInput.addEventListener('keyup', function() {
+        const filter = searchInput.value.toLowerCase(); // Ambil teks pencarian, ubah jadi huruf kecil
 
-    // Loop semua baris tabel (tr)
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        // Ambil semua sel (td) di dalam baris
-        const cells = row.getElementsByTagName('td');
-        
-        // Ambil teks dari kolom pertama (Nama Barang [indeks 0])
-        const namaBarang = cells[0].textContent || cells[0].innerText;
-        
-        // Cek apakah nama barang mengandung teks pencarian
-        if (namaBarang.toLowerCase().indexOf(filter) > -1) {
-            row.style.display = ""; // Tampilkan baris
-        } else {
-            row.style.display = "none"; // Sembunyikan baris
+        // Loop semua baris tabel (tr)
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            // Ambil semua sel (td) di dalam baris
+            const cells = row.getElementsByTagName('td');
+            
+            // Ambil teks dari kolom pertama (Nama Barang [indeks 0])
+            const namaBarang = cells[0].textContent || cells[0].innerText;
+            
+            // Cek apakah nama barang mengandung teks pencarian
+            if (namaBarang.toLowerCase().indexOf(filter) > -1) {
+                row.style.display = ""; // Tampilkan baris
+            } else {
+                row.style.display = "none"; // Sembunyikan baris
+            }
         }
-    }
-});
+    });
+}
+
+// Hitung Kembalian secara Real-time
+const jumlahBayarInput = document.getElementById('jumlah_bayar');
+const kembalianEl = document.getElementById('kembalian');
+const totalHarga = <?php echo $total_harga; ?>;
+
+if (jumlahBayarInput && kembalianEl) {
+    jumlahBayarInput.addEventListener('input', function() {
+        const bayar = parseFloat(jumlahBayarInput.value) || 0;
+        const kembalian = Math.max(0, bayar - totalHarga);
+        kembalianEl.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(kembalian);
+    });
+}
 </script>
 
 

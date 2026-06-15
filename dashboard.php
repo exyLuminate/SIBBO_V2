@@ -79,20 +79,40 @@ include 'templates/header.php';
 
 <div class="dashboard-grid">
     <div class="stat-card">
-        <h3>Penjualan Hari Ini</h3>
-        <p>Rp <?php echo number_format($stats_today['total_penjualan'], 0, ',', '.'); ?></p>
+        <div class="stat-card-info">
+            <h3>Penjualan Hari Ini</h3>
+            <p>Rp <?php echo number_format($stats_today['total_penjualan'], 0, ',', '.'); ?></p>
+        </div>
+        <div class="stat-card-icon">
+            <i class="fas fa-wallet"></i>
+        </div>
     </div>
     <div class="stat-card">
-        <h3>Transaksi Hari Ini</h3>
-        <p><?php echo $stats_today['jumlah_transaksi']; ?> Transaksi</p>
+        <div class="stat-card-info">
+            <h3>Transaksi Hari Ini</h3>
+            <p><?php echo $stats_today['jumlah_transaksi']; ?> Transaksi</p>
+        </div>
+        <div class="stat-card-icon">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
     </div>
     <div class="stat-card">
-        <h3>Total Jenis Barang</h3>
-        <p><?php echo $stats_total_barang['total_barang']; ?> Item</p>
+        <div class="stat-card-info">
+            <h3>Total Jenis Barang</h3>
+            <p><?php echo $stats_total_barang['total_barang']; ?> Item</p>
+        </div>
+        <div class="stat-card-icon">
+            <i class="fas fa-box"></i>
+        </div>
     </div>
     <div class="stat-card">
-        <h3>Total Stok Tersedia</h3>
-        <p><?php echo $stats_total_stok['total_stok']; ?> Unit</p>
+        <div class="stat-card-info">
+            <h3>Total Stok Tersedia</h3>
+            <p><?php echo $stats_total_stok['total_stok'] ?? 0; ?> Unit</p>
+        </div>
+        <div class="stat-card-icon">
+            <i class="fas fa-cubes"></i>
+        </div>
     </div>
 </div>
 
@@ -130,15 +150,34 @@ include 'templates/header.php';
             datasets: [{
                 label: 'Total Terjual (unit)',
                 data: data, // Data Y-axis (jumlah terjual)
-                backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                borderColor: 'rgba(0, 123, 255, 1)',
-                borderWidth: 1
+                backgroundColor: 'rgba(79, 70, 229, 0.15)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 2,
+                borderRadius: 6
             }]
         },
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            family: 'Plus Jakarta Sans',
+                            weight: '600'
+                        }
+                    }
                 }
             },
             responsive: true,
