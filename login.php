@@ -19,12 +19,13 @@ if (isset($_SESSION['logged_in'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="login-body">
+    <div class="login-bg-circle"></div>
     <div class="login-container">
         <form action="proses_login.php" method="POST">
-            <div class="login-brand" style="text-align: center; margin-bottom: 2rem;">
-                <i class="fas fa-shopping-bag" style="font-size: 3rem; color: var(--primary); margin-bottom: 0.5rem; display: inline-block;"></i>
-                <h2 style="margin: 0; font-weight: 800; font-size: 1.6rem; color: var(--text-main); letter-spacing: -0.5px;">SIBBO</h2>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">Sistem Belanja Berbasis Online</span>
+            <div class="login-brand" style="text-align: center; margin-bottom: 2.5rem;">
+                <i class="fas fa-shopping-bag" style="font-size: 3.5rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 10px rgba(99, 102, 241, 0.4)); margin-bottom: 0.75rem; display: inline-block;"></i>
+                <h2>SIBBO</h2>
+                <span style="display: block; text-align: center;">Sistem Belanja Berbasis Online</span>
             </div>
             
             <?php 
@@ -36,10 +37,10 @@ if (isset($_SESSION['logged_in'])) {
             ?>
 
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
+            <input type="text" id="username" name="username" placeholder="Masukkan username" required autocomplete="off">
             
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" placeholder="Masukkan password" required>
             
             <button type="submit">Login</button>
         </form>

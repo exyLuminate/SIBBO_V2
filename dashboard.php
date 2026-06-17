@@ -135,25 +135,39 @@ include 'templates/header.php';
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // Ambil elemen <canvas>
-    const ctx = document.getElementById('myChart');
+    // Ambil elemen <canvas> dan konteks 2D untuk membuat gradient
+    const canvas = document.getElementById('myChart');
+    const ctx = canvas.getContext('2d');
     
     // Ambil data dari PHP
     const labels = <?php echo $labels_chart; ?>;
     const data = <?php echo $data_chart; ?>;
 
+    // Buat gradient background
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    bgGradient.addColorStop(0, 'rgba(99, 102, 241, 0.45)');  // Indigo
+    bgGradient.addColorStop(1, 'rgba(139, 92, 246, 0.05)'); // Violet fading out
+
+    // Buat gradient border
+    const borderGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    borderGradient.addColorStop(0, 'rgba(99, 102, 241, 1)');
+    borderGradient.addColorStop(1, 'rgba(139, 92, 246, 1)');
+
     // Buat chart baru
     new Chart(ctx, {
-        type: 'bar', // Tipe chart: 'bar', 'line', 'pie', etc.
+        type: 'bar',
         data: {
-            labels: labels, // Label X-axis (nama barang)
+            labels: labels,
             datasets: [{
                 label: 'Total Terjual (unit)',
-                data: data, // Data Y-axis (jumlah terjual)
-                backgroundColor: 'rgba(79, 70, 229, 0.15)',
-                borderColor: 'rgba(79, 70, 229, 1)',
+                data: data,
+                backgroundColor: bgGradient,
+                borderColor: borderGradient,
                 borderWidth: 2,
-                borderRadius: 6
+                borderRadius: 8,
+                borderSkipped: false,
+                hoverBackgroundColor: 'rgba(99, 102, 241, 0.6)',
+                hoverBorderColor: 'rgba(99, 102, 241, 1)'
             }]
         },
         options: {
@@ -161,12 +175,27 @@ include 'templates/header.php';
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: '#f1f5f9'
+                        color: 'rgba(226, 232, 240, 0.6)',
+                        drawTicks: false
+                    },
+                    ticks: {
+                        font: {
+                            family: 'Plus Jakarta Sans',
+                            weight: '500'
+                        },
+                        color: '#64748b'
                     }
                 },
                 x: {
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        font: {
+                            family: 'Plus Jakarta Sans',
+                            weight: '600'
+                        },
+                        color: '#64748b'
                     }
                 }
             },
@@ -175,13 +204,32 @@ include 'templates/header.php';
                     labels: {
                         font: {
                             family: 'Plus Jakarta Sans',
-                            weight: '600'
-                        }
+                            weight: '700',
+                            size: 13
+                        },
+                        color: '#0f172a'
                     }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: {
+                        family: 'Plus Jakarta Sans',
+                        weight: '700'
+                    },
+                    bodyFont: {
+                        family: 'Plus Jakarta Sans'
+                    },
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: false
                 }
             },
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            }
         }
     });
 </script>

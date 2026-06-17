@@ -40,4 +40,4 @@
             </div>
         </header>
         
-        <main>
+        <main class="page-animate">
