@@ -63,7 +63,7 @@ if (isset($_SESSION['error'])) {
     <?php endif; ?>
 </form>
 
-        <table class="table">
+        <table class="table table-kategori">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -98,9 +98,9 @@ if (isset($_SESSION['error'])) {
                     while($row = mysqli_fetch_assoc($result)) {
                 ?>
                     <tr>
-                        <td><?php echo $row['id_kategori']; ?></td>
-                        <td><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
-                        <td>
+                        <td data-label="ID"><?php echo $row['id_kategori']; ?></td>
+                        <td data-label="Nama Kategori"><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
+                        <td data-label="Aksi">
                             <a href="kategori_edit.php?id=<?php echo $row['id_kategori']; ?>" class="btn btn-warning">Edit</a>
                             
                             <a href="kategori_proses.php?action=hapus&id=<?php echo $row['id_kategori']; ?>" 

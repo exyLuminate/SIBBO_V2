@@ -31,7 +31,7 @@ if (isset($_SESSION['error'])) {
         <a href="pengguna_tambah.php" class="btn btn-primary">Tambah Pengguna Baru</a>
     </div>
     <div class="card-body">
-        <table class="table">
+        <table class="table table-pengguna">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -43,7 +43,20 @@ if (isset($_SESSION['error'])) {
             </thead>
             <tbody>
                 <?php
-                // Query JOIN untuk mengambil nama peran
+                // Konfigurasi pagination
+                $limit = 10;
+                $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                if ($page < 1) $page = 1;
+                $offset = ($page - 1) * $limit;
+
+                // Ambil total data untuk pagination
+                $sql_count = "SELECT COUNT(id_pengguna) AS total FROM pengguna WHERE deleted_at IS NULL";
+                $res_count = mysqli_query($koneksi, $sql_count);
+                $count_data = mysqli_fetch_assoc($res_count);
+                $total_rows = $count_data['total'];
+                $total_pages = ceil($total_rows / $limit);
+
+                // Query JOIN untuk mengambil nama peran dengan LIMIT & OFFSET
                 $sql = "SELECT 
                             pengguna.id_pengguna, 
                             pengguna.nama_lengkap, 
@@ -56,19 +69,22 @@ if (isset($_SESSION['error'])) {
                         WHERE 
                             pengguna.deleted_at IS NULL 
                         ORDER BY 
-                            pengguna.nama_lengkap ASC";
+                            pengguna.nama_lengkap ASC LIMIT ? OFFSET ?";
                 
-                $result = mysqli_query($koneksi, $sql);
+                $stmt = mysqli_prepare($koneksi, $sql);
+                mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
 
                 if (mysqli_num_rows($result) > 0) {
                     while($row = mysqli_fetch_assoc($result)) {
                 ?>
                     <tr>
-                        <td><?php echo $row['id_pengguna']; ?></td>
-                        <td><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
-                        <td><?php echo htmlspecialchars($row['username']); ?></td>
-                        <td><?php echo htmlspecialchars($row['nama_peran']); ?></td>
-                        <td>
+                        <td data-label="ID"><?php echo $row['id_pengguna']; ?></td>
+                        <td data-label="Nama Lengkap"><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
+                        <td data-label="Username"><?php echo htmlspecialchars($row['username']); ?></td>
+                        <td data-label="Peran (Role)"><?php echo htmlspecialchars($row['nama_peran']); ?></td>
+                        <td data-label="Aksi">
                             <a href="pengguna_edit.php?id=<?php echo $row['id_pengguna']; ?>" class="btn btn-warning">Edit</a>
                             
                             <?php
@@ -93,6 +109,27 @@ if (isset($_SESSION['error'])) {
                 ?>
             </tbody>
         </table>
+
+        <!-- Navigasi Pagination -->
+        <?php if ($total_pages > 1): ?>
+        <div class="pagination">
+            <!-- Tombol Previous -->
+            <a href="pengguna.php?page=<?php echo ($page > 1) ? ($page - 1) : 1; ?>" 
+               class="pagination-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>"
+               <?php echo ($page <= 1) ? 'onclick="return false;"' : ''; ?>>&laquo; Prev</a>
+
+            <!-- Nomor Halaman -->
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="pengguna.php?page=<?php echo $i; ?>" 
+                   class="pagination-item <?php echo ($page == $i) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+            <?php endfor; ?>
+
+            <!-- Tombol Next -->
+            <a href="pengguna.php?page=<?php echo ($page < $total_pages) ? ($page + 1) : $total_pages; ?>" 
+               class="pagination-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>"
+               <?php echo ($page >= $total_pages) ? 'onclick="return false;"' : ''; ?>>Next &raquo;</a>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

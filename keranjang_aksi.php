@@ -15,6 +15,14 @@ if (!isset($_SESSION['keranjang'])) {
 
 $action = $_GET['action'] ?? '';
 $id_barang = $_GET['id'] ?? 0;
+$csrf_token = $_GET['csrf_token'] ?? '';
+
+// Validasi Token CSRF untuk keamanan aksi
+if (empty($csrf_token) || !isset($_SESSION['csrf_token']) || $csrf_token !== $_SESSION['csrf_token']) {
+    $_SESSION['error'] = "Aksi ditolak: Token keamanan CSRF tidak valid atau kedaluwarsa.";
+    header('Location: kasir.php');
+    exit;
+}
 
 // ==========================================================
 // AKSI: TAMBAH ITEM KE KERANJANG

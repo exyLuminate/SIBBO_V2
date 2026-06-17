@@ -143,13 +143,25 @@ body {
     align-items: center;
     min-height: 100vh;
     background: linear-gradient(135deg, #090d16 0%, #111129 100%);
-    padding: 1rem;
+    padding: 1.5rem 1rem;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Floating background decoration */
-.login-body::before, .login-body::after, .login-bg-circle {
+.login-decorations {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.login-decorations::before, .login-decorations::after, .login-bg-circle {
     content: '';
     position: absolute;
     border-radius: 50%;
@@ -157,7 +169,7 @@ body {
     z-index: 1;
     opacity: 0.25;
 }
-.login-body::before {
+.login-decorations::before {
     background: radial-gradient(circle, #6366f1 0%, transparent 70%);
     width: 600px;
     height: 600px;
@@ -165,7 +177,7 @@ body {
     left: -10%;
     animation: float 12s ease-in-out infinite;
 }
-.login-body::after {
+.login-decorations::after {
     background: radial-gradient(circle, #ec4899 0%, transparent 70%);
     width: 500px;
     height: 500px;
@@ -242,6 +254,18 @@ body {
     border-color: var(--primary);
     background: rgba(15, 23, 42, 0.6);
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+}
+
+.login-container input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.login-container input:-webkit-autofill,
+.login-container input:-webkit-autofill:hover, 
+.login-container input:-webkit-autofill:focus {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px #090d16 inset;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .login-container button {
@@ -1279,18 +1303,118 @@ main {
     }
 }
 
+/* Mobile Screens (Layar di bawah 768px) - Ubah Tabel Menjadi Kartu */
+@media (max-width: 767.98px) {
+    .table {
+        border-spacing: 0;
+        margin-top: 0.5rem;
+        border: none;
+    }
+    
+    .table thead {
+        display: none; /* Sembunyikan header tabel */
+    }
+    
+    .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
+    }
+    
+    .table tr {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        margin-bottom: 1.25rem;
+        padding: 0.5rem 0;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+    
+    .table tr:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .table td {
+        border: none !important;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+        padding: 0.85rem 1.25rem !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        white-space: normal !important;
+        border-radius: 0 !important;
+    }
+    
+    .table td:last-child {
+        border-bottom: none !important;
+    }
+    
+    /* Generasi label dari atribut data-label */
+    .table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: var(--text-muted);
+        text-align: left;
+        padding-right: 1rem;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Kasir specific card adjustments */
+    .table td .quantity-control {
+        justify-content: flex-end;
+    }
+}
+
 /* Phones (Layar kecil sampai 576px) */
 @media (max-width: 575.98px) {
+    /* Login Page Padding */
+    .login-container {
+        padding: 2.25rem 1.5rem;
+        margin: 0.5rem;
+        border-radius: var(--radius-lg);
+    }
+    
+    .login-container h2 {
+        font-size: 1.75rem;
+    }
+    
+    .login-brand {
+        margin-bottom: 1.75rem !important;
+    }
+
+    /* Dashboard Chart Height */
+    .chart-container {
+        height: 280px;
+    }
+
     .main-content header {
-        padding: 1rem;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
+        padding: 0.75rem 1rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
         margin-top: 0;
+        margin-bottom: 1rem;
     }
 
     .user-info {
+        padding: 0.35rem;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
         justify-content: center;
+        align-items: center;
+        gap: 0;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    .user-details {
+        display: none;
     }
 
     .card-header {
@@ -1299,11 +1423,6 @@ main {
 
     .card-body {
         padding: 1.25rem 1rem;
-    }
-
-    .table th, .table td {
-        padding: 0.85rem;
-        font-size: 0.85rem;
     }
 
     .search-form {
@@ -1325,5 +1444,664 @@ main {
     .filter-form .form-group {
         flex: none;
         width: 100%;
+    }
+}
+
+/* --- PAGINATION STYLING --- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.pagination-item {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.pagination-item:hover:not(.disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.pagination-item.active {
+    background: var(--primary-gradient);
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+}
+
+.pagination-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+
+/* --- GAYA CETAK STRUK (THERMAL PRINTER FRIENDLY) --- */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 10pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Sembunyikan elemen non-cetak */
+    .sidebar,
+    .sidebar-overlay,
+    .main-content header,
+    .main-content footer,
+    .no-print,
+    .btn,
+    button {
+        display: none !important;
+    }
+    
+    /* Maksimalkan layout konten */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        min-height: auto !important;
+    }
+    
+    /* Format invoice agar pas dengan struk belanja thermal (lebar kecil) */
+    .print-invoice-card {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .card-header {
+        border-bottom: 2px dashed #000 !important;
+        padding: 10px 0 !important;
+        background: transparent !important;
+        justify-content: center !important;
+    }
+    
+    .card-header h3 {
+        font-size: 13pt !important;
+        text-align: center !important;
+        width: 100% !important;
+    }
+    
+    .card-body {
+        padding: 15px 0 !important;
+    }
+    
+    /* Format tabel barang di struk */
+    .table {
+        margin-top: 10px !important;
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+    
+    .table thead {
+        display: table-header-group !important; /* Tampilkan kembali header tabel saat print */
+    }
+    
+    .table th {
+        background: transparent !important;
+        border-bottom: 1px solid #000 !important;
+        color: black !important;
+        font-size: 9pt !important;
+        padding: 5px 0 !important;
+        text-align: left !important;
+    }
+    
+    .table td {
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 1px dashed #ccc !important;
+        font-size: 9pt !important;
+        padding: 6px 0 !important;
+        display: table-cell !important; /* Kembalikan ke format tabel biasa saat print */
+        text-align: left !important;
+        width: auto !important;
+    }
+    
+    .table tr {
+        display: table-row !important;
+        border: none !important;
+        box-shadow: none !important;
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .table td::before {
+        display: none !important; /* Hilangkan data-label mobile saat mencetak */
+    }
+    
+    .table th:nth-child(2),
+    .table td:nth-child(2),
+    .table th:nth-child(3),
+    .table td:nth-child(3),
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        text-align: right !important;
+    }
+    
+    .info-transaksi, .info-pembayaran {
+        font-size: 9pt !important;
+    }
+    
+    .info-transaksi p, .info-pembayaran p {
+        border-bottom: 1px dashed #000 !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    hr {
+        border: none !important;
+        border-top: 1px dashed #000 !important;
+        margin: 10px 0 !important;
+    }
+    
+    .kasir-barang-meta,
+    .kasir-keranjang-subtotal-mobile,
+    .laporan-detail-meta {
+        display: none !important;
+    }
+}
+
+/* --- TAMPILAN MOBILE & LAYOUT KARTU KUSTOM --- */
+
+/* Tab Switcher Kasir */
+.kasir-tabs {
+    display: none;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.kasir-tab-btn {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    backdrop-filter: blur(8px);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.kasir-tab-btn.active {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.kasir-tab-badge {
+    background: var(--danger-gradient);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 10px;
+    margin-left: 0.25rem;
+    box-shadow: 0 2px 6px rgba(244, 63, 94, 0.3);
+}
+
+/* Desktop layout helper: Hide mobile meta */
+@media (min-width: 768px) {
+    .kasir-barang-meta,
+    .kasir-keranjang-subtotal-mobile,
+    .laporan-detail-meta {
+        display: none !important;
+    }
+}
+
+/* Tablets / iPads (Layar sampai 991px) */
+@media (max-width: 991.98px) {
+    .kasir-tabs {
+        display: flex;
+    }
+    
+    .kasir-container .daftar-barang,
+    .kasir-container .keranjang {
+        display: none;
+    }
+    
+    .kasir-container .daftar-barang.active-tab,
+    .kasir-container .keranjang.active-tab {
+        display: block;
+    }
+}
+
+/* Mobile Screens (Layar di bawah 768px) - Ubah Tabel Menjadi Kartu */
+@media (max-width: 767.98px) {
+    /* --- TABLE OVERRIDES --- */
+    
+    /* 1. Kasir: Daftar Barang */
+    .table-kasir-barang tr {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        gap: 1rem;
+    }
+    
+    .table-kasir-barang td {
+        display: block !important;
+        width: auto !important;
+        padding: 0 !important;
+        border: none !important;
+        justify-content: initial !important;
+        text-align: left !important;
+    }
+    
+    .table-kasir-barang td::before {
+        display: none !important;
+    }
+    
+    .table-kasir-barang td[data-label="Nama Barang"] {
+        flex: 1;
+    }
+    
+    .table-kasir-barang td[data-label="Harga (Rp)"],
+    .table-kasir-barang td[data-label="Stok"] {
+        display: none !important;
+    }
+
+    .kasir-barang-meta {
+        display: flex;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+        align-items: center;
+    }
+
+    /* 2. Kasir: Keranjang Belanja */
+    .table-kasir-keranjang tr {
+        display: flex !important;
+        flex-direction: column;
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+        position: relative;
+    }
+
+    .table-kasir-keranjang td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        justify-content: initial !important;
+        text-align: left !important;
+    }
+    
+    .table-kasir-keranjang td::before {
+        display: none !important;
+    }
+
+    .table-kasir-keranjang td[data-label="Subtotal (Rp)"] {
+        display: none !important;
+    }
+
+    .kasir-keranjang-harga-sub {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.25rem;
+    }
+
+    .kasir-keranjang-subtotal-mobile {
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .table-kasir-keranjang td[data-label="Jumlah"] {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: space-between !important;
+        width: 100% !important;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem !important;
+        border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+    }
+
+    .table-kasir-keranjang td[data-label="Jumlah"]::before {
+        display: block !important;
+        content: "Jumlah" !important;
+        font-weight: 700;
+        color: var(--text-muted);
+        font-size: 0.82rem;
+    }
+
+    .table-kasir-keranjang td[data-label="Aksi"] {
+        position: absolute;
+        right: 1rem;
+        top: 0.75rem;
+        width: auto !important;
+    }
+    
+    /* 3. Barang */
+    .table-barang tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .table-barang td {
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 0.25rem 0 !important;
+        border: none !important;
+    }
+    
+    .table-barang td::before {
+        content: attr(data-label);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.15rem;
+    }
+    
+    .table-barang td[data-label="Nama Barang"] {
+        grid-column: span 2;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+        padding-bottom: 0.5rem !important;
+        margin-bottom: 0.25rem;
+    }
+    
+    .table-barang td[data-label="Nama Barang"]::before {
+        display: none;
+    }
+
+    .table-barang td[data-label="ID"] {
+        display: none !important;
+    }
+    
+    .table-barang td[data-label="Aksi"] {
+        grid-column: span 2;
+        flex-direction: row !important;
+        gap: 0.5rem;
+        width: 100% !important;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem !important;
+        border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+    }
+    
+    .table-barang td[data-label="Aksi"]::before {
+        display: none;
+    }
+    
+    .table-barang td[data-label="Aksi"] .btn {
+        margin-right: 0;
+    }
+
+    /* 4. Kategori */
+    .table-kategori tr {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+    }
+    
+    .table-kategori td {
+        display: block !important;
+        width: auto !important;
+        padding: 0 !important;
+        border: none !important;
+        justify-content: initial !important;
+        text-align: left !important;
+    }
+    
+    .table-kategori td::before {
+        display: none !important;
+    }
+    
+    .table-kategori td[data-label="ID"] {
+        display: none !important;
+    }
+    
+    .table-kategori td[data-label="Nama Kategori"] {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text-main);
+    }
+    
+    .table-kategori td[data-label="Aksi"] {
+        display: flex !important;
+        gap: 0.5rem;
+    }
+    
+    .table-kategori td[data-label="Aksi"] .btn {
+        margin-right: 0;
+    }
+
+    /* 5. Pengguna */
+    .table-pengguna tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .table-pengguna td {
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 0.25rem 0 !important;
+        border: none !important;
+    }
+    
+    .table-pengguna td::before {
+        content: attr(data-label);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.15rem;
+    }
+    
+    .table-pengguna td[data-label="Nama Lengkap"] {
+        grid-column: span 2;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+        padding-bottom: 0.5rem !important;
+        margin-bottom: 0.25rem;
+    }
+    
+    .table-pengguna td[data-label="Nama Lengkap"]::before {
+        display: none;
+    }
+    
+    .table-pengguna td[data-label="ID"] {
+        display: none !important;
+    }
+    
+    .table-pengguna td[data-label="Aksi"] {
+        grid-column: span 2;
+        flex-direction: row !important;
+        gap: 0.5rem;
+        width: 100% !important;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem !important;
+        border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+    }
+    
+    .table-pengguna td[data-label="Aksi"]::before {
+        display: none;
+    }
+    
+    .table-pengguna td[data-label="Aksi"] .btn,
+    .table-pengguna td[data-label="Aksi"] button {
+        margin-right: 0;
+    }
+
+    /* 6. Stok */
+    .table-stok tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .table-stok td {
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 0.25rem 0 !important;
+        border: none !important;
+    }
+    
+    .table-stok td::before {
+        content: attr(data-label);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.15rem;
+    }
+    
+    .table-stok td[data-label="Nama Barang"] {
+        grid-column: span 2;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+        padding-bottom: 0.5rem !important;
+        margin-bottom: 0.25rem;
+    }
+    
+    .table-stok td[data-label="Nama Barang"]::before {
+        display: none;
+    }
+
+    /* 7. Laporan */
+    .table-laporan tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .table-laporan td {
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 0.25rem 0 !important;
+        border: none !important;
+    }
+    
+    .table-laporan td::before {
+        content: attr(data-label);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.15rem;
+    }
+    
+    .table-laporan td[data-label="No. Invoice"] {
+        grid-column: span 2;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+        padding-bottom: 0.5rem !important;
+        margin-bottom: 0.25rem;
+    }
+    
+    .table-laporan td[data-label="No. Invoice"]::before {
+        display: none;
+    }
+    
+    .table-laporan td[data-label="Aksi"] {
+        grid-column: span 2;
+        flex-direction: row !important;
+        gap: 0.5rem;
+        width: 100% !important;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem !important;
+        border-top: 1px solid rgba(226, 232, 240, 0.5) !important;
+    }
+    
+    .table-laporan td[data-label="Aksi"]::before {
+        display: none;
+    }
+    
+    .table-laporan td[data-label="Aksi"] .btn {
+        margin-right: 0;
+    }
+
+    /* 8. Laporan Detail */
+    .table-laporan-detail tr {
+        display: flex !important;
+        flex-direction: column;
+        padding: 0.75rem 1rem;
+    }
+
+    .table-laporan-detail td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        justify-content: initial !important;
+        text-align: left !important;
+    }
+    
+    .table-laporan-detail td::before {
+        display: none !important;
+    }
+
+    .table-laporan-detail td[data-label="Harga Satuan (Rp)"],
+    .table-laporan-detail td[data-label="Jumlah"],
+    .table-laporan-detail td[data-label="Subtotal (Rp)"] {
+        display: none !important;
+    }
+
+    .laporan-detail-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.25rem;
+    }
+
+    .laporan-detail-subtotal-mobile {
+        font-weight: 700;
+        color: var(--primary);
     }
 }

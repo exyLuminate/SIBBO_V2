@@ -11,7 +11,7 @@ if (empty($username) || empty($password)) {
     exit;
 }
 
-// Ambil data pengguna DAN perannya
+// Ambil data pengguna DAN perannya yang belum dihapus (soft delete)
 $sql = "SELECT 
             pengguna.id_pengguna, 
             pengguna.username, 
@@ -22,7 +22,7 @@ $sql = "SELECT
         JOIN 
             peran ON pengguna.id_peran = peran.id_peran
         WHERE 
-            pengguna.username = ?";
+            pengguna.username = ? AND pengguna.deleted_at IS NULL";
 
 $stmt = mysqli_prepare($koneksi, $sql);
 mysqli_stmt_bind_param($stmt, "s", $username);
@@ -34,6 +34,16 @@ if (mysqli_num_rows($result) === 1) {
 
     // Verifikasi password
     if (password_verify($password, $user['password_hash'])) {
+        // Mencegah Session Fixation: Regenerasi ID sesi sebelum menyimpan data login
+        session_regenerate_id(true);
+        
+        // Buat token CSRF baru yang unik untuk sesi baru ini
+        try {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        } catch (Exception $e) {
+            $_SESSION['csrf_token'] = md5(uniqid(rand(), true));
+        }
+        
         // Password benar! Buat session
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = $user['id_pengguna'];

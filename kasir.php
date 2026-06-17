@@ -34,6 +34,26 @@ if (isset($_SESSION['error'])) {
 }
 ?>
 
+<?php
+$keranjang = $_SESSION['keranjang'] ?? [];
+$jumlah_keranjang = 0;
+if (!empty($keranjang)) {
+    foreach ($keranjang as $item) {
+        $jumlah_keranjang += $item['jumlah'];
+    }
+}
+?>
+
+<div class="kasir-tabs no-print">
+    <button type="button" class="kasir-tab-btn active" id="tab-barang-btn" onclick="switchKasirTab('barang')">
+        <i class="fas fa-th-list"></i> Daftar Barang
+    </button>
+    <button type="button" class="kasir-tab-btn" id="tab-keranjang-btn" onclick="switchKasirTab('keranjang')">
+        <i class="fas fa-shopping-cart"></i> Keranjang
+        <span class="kasir-tab-badge" id="cart-badge" style="<?php echo $jumlah_keranjang > 0 ? '' : 'display: none;'; ?>"><?php echo $jumlah_keranjang; ?></span>
+    </button>
+</div>
+
 <div class="kasir-container">
 
     <div class="daftar-barang">
@@ -47,7 +67,7 @@ if (isset($_SESSION['error'])) {
                 
             </div>
             <div class="card-body">
-                <table class="table table-stripe">
+                <table class="table table-stripe table-kasir-barang">
                     <thead>
                         <tr>
                             <th>Nama Barang</th>
@@ -60,18 +80,34 @@ if (isset($_SESSION['error'])) {
                     <tbody id="daftarBarangTbody"> 
                         <?php while($barang = mysqli_fetch_assoc($barang_result)): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($barang['nama_barang']); ?></td>
-                            <td><?php echo number_format($barang['harga_jual'], 0, ',', '.'); ?></td>
-                            <td>
+                            <td data-label="Nama Barang">
+                                <div class="kasir-barang-info">
+                                    <span class="kasir-barang-nama"><?php echo htmlspecialchars($barang['nama_barang']); ?></span>
+                                    <div class="kasir-barang-meta">
+                                        <span class="kasir-barang-harga">Rp <?php echo number_format($barang['harga_jual'], 0, ',', '.'); ?></span>
+                                        <span class="kasir-barang-divider">&bull;</span>
+                                        <span class="kasir-barang-stok">
+                                            Stok: 
+                                            <?php if($barang['stok'] <= 0): ?>
+                                                <span class="badge-danger">Habis</span>
+                                            <?php else: ?>
+                                                <strong><?php echo $barang['stok']; ?></strong>
+                                            <?php endif; ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Harga (Rp)"><?php echo number_format($barang['harga_jual'], 0, ',', '.'); ?></td>
+                            <td data-label="Stok">
                                 <?php if($barang['stok'] <= 0): ?>
                                     <span class="badge-danger">Habis</span>
                                 <?php else: ?>
                                     <?php echo $barang['stok']; ?>
                                 <?php endif; ?>
                             </td>
-                            <td>
+                            <td data-label="Aksi">
                                 <?php if($barang['stok'] > 0): ?>
-                                    <a href="keranjang_aksi.php?action=tambah&id=<?php echo $barang['id_barang']; ?>" class="btn btn-primary btn-sm">+</a>
+                                    <a href="keranjang_aksi.php?action=tambah&id=<?php echo $barang['id_barang']; ?>&csrf_token=<?php echo $_SESSION['csrf_token']; ?>" class="btn btn-primary btn-sm">+</a>
                                 <?php else: ?>
                                     <button class="btn btn-sm" disabled>Habis</button>
                                 <?php endif; ?>
@@ -91,7 +127,7 @@ if (isset($_SESSION['error'])) {
             </div>
             <div class="card-body">
                 
-                <table class="table">
+                <table class="table table-kasir-keranjang">
                     <thead>
                         <tr>
                             <th>Barang</th>
@@ -110,19 +146,25 @@ if (isset($_SESSION['error'])) {
                                 $total_harga += $subtotal;
                         ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($item['nama']); ?><br>
-                                    <small><?php echo number_format($item['harga'], 0, ',', '.'); ?></small>
-                                </td>
-                                <td>
-                                    <div class="quantity-control">
-                                        <a href="keranjang_aksi.php?action=kurang&id=<?php echo $id_barang; ?>" class="btn-qty">-</a>
-                                        <span class="qty-val"><?php echo $item['jumlah']; ?></span>
-                                        <a href="keranjang_aksi.php?action=tambah&id=<?php echo $id_barang; ?>" class="btn-qty">+</a>
+                                <td data-label="Barang">
+                                    <div class="kasir-keranjang-info">
+                                        <span class="kasir-keranjang-nama"><?php echo htmlspecialchars($item['nama']); ?></span>
+                                        <span class="kasir-keranjang-harga-sub">
+                                            <small><?php echo number_format($item['harga'], 0, ',', '.'); ?> x <?php echo $item['jumlah']; ?></small>
+                                            <span class="kasir-keranjang-subtotal-mobile">Rp <?php echo number_format($subtotal, 0, ',', '.'); ?></span>
+                                        </span>
                                     </div>
                                 </td>
-                                <td><?php echo number_format($subtotal, 0, ',', '.'); ?></td>
-                                <td>
-                                    <a href="keranjang_aksi.php?action=hapus&id=<?php echo $id_barang; ?>" class="btn-qty-danger">x</a>
+                                <td data-label="Jumlah">
+                                    <div class="quantity-control">
+                                        <a href="keranjang_aksi.php?action=kurang&id=<?php echo $id_barang; ?>&csrf_token=<?php echo $_SESSION['csrf_token']; ?>" class="btn-qty">-</a>
+                                        <span class="qty-val"><?php echo $item['jumlah']; ?></span>
+                                        <a href="keranjang_aksi.php?action=tambah&id=<?php echo $id_barang; ?>&csrf_token=<?php echo $_SESSION['csrf_token']; ?>" class="btn-qty">+</a>
+                                    </div>
+                                </td>
+                                <td data-label="Subtotal (Rp)"><?php echo number_format($subtotal, 0, ',', '.'); ?></td>
+                                <td data-label="Aksi">
+                                    <a href="keranjang_aksi.php?action=hapus&id=<?php echo $id_barang; ?>&csrf_token=<?php echo $_SESSION['csrf_token']; ?>" class="btn-qty-danger">x</a>
                                 </td>
                             </tr>
                         <?php 
@@ -136,7 +178,7 @@ if (isset($_SESSION['error'])) {
 
                 <?php if (!empty($keranjang)): ?>
                 <div style="margin-top: 1.25rem; margin-bottom: 1.25rem;">
-                    <a href="keranjang_aksi.php?action=kosongkan" class="btn btn-danger btn-sm" onclick="return confirm('Kosongkan keranjang?')">
+                    <a href="keranjang_aksi.php?action=kosongkan&csrf_token=<?php echo $_SESSION['csrf_token']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Kosongkan keranjang?')">
                         Kosongkan Keranjang
                     </a>
                 </div>
@@ -145,6 +187,7 @@ if (isset($_SESSION['error'])) {
                 <hr style="border: 0; border-top: 1px solid rgba(226, 232, 240, 0.8); margin: 1.5rem 0;">
 
                 <form action="proses_transaksi.php" method="POST" id="form-pembayaran">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <div class="total-belanja-container">
                         <span class="total-belanja-label">Total Belanja:</span>
                         <h1 id="total-belanja">Rp <?php echo number_format($total_harga, 0, ',', '.'); ?></h1>
@@ -189,7 +232,33 @@ if (isset($_SESSION['error'])) {
 </div>
 
 <script>
+function switchKasirTab(tabName) {
+    const barangDiv = document.querySelector('.daftar-barang');
+    const keranjangDiv = document.querySelector('.keranjang');
+    const tabBarangBtn = document.getElementById('tab-barang-btn');
+    const tabKeranjangBtn = document.getElementById('tab-keranjang-btn');
+    
+    if (!barangDiv || !keranjangDiv || !tabBarangBtn || !tabKeranjangBtn) return;
+
+    if (tabName === 'barang') {
+        barangDiv.classList.add('active-tab');
+        keranjangDiv.classList.remove('active-tab');
+        tabBarangBtn.classList.add('active');
+        tabKeranjangBtn.classList.remove('active');
+    } else {
+        barangDiv.classList.remove('active-tab');
+        keranjangDiv.classList.add('active-tab');
+        tabBarangBtn.classList.remove('active');
+        tabKeranjangBtn.classList.add('active');
+    }
+    
+    localStorage.setItem('activeKasirTab', tabName);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tab switcher state
+    const savedTab = localStorage.getItem('activeKasirTab') || 'barang';
+    switchKasirTab(savedTab);
     // Ambil elemen input dan tabel
     const searchInput = document.getElementById('searchInput');
     const tableBody = document.getElementById('daftarBarangTbody');

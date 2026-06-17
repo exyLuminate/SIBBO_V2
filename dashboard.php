@@ -40,7 +40,12 @@ $result_total_stok = mysqli_query($koneksi, $sql_total_stok);
 $stats_total_stok = mysqli_fetch_assoc($result_total_stok);
 
 
-// 3. DATA UNTUK CHART (Barang Terlaris)
+// 3. DATA UNTUK CHART (Barang Terlaris dengan Filter Tanggal)
+$filter_tgl_mulai = $_GET['chart_tgl_mulai'] ?? date('Y-m-d', strtotime('-30 days'));
+$filter_tgl_selesai = $_GET['chart_tgl_selesai'] ?? date('Y-m-d');
+
+$filter_tgl_selesai_end = $filter_tgl_selesai . ' 23:59:59';
+
 $sql_top_produk = "SELECT 
                         barang.nama_barang, 
                         SUM(detailtransaksi.jumlah) AS total_terjual 
@@ -52,13 +57,18 @@ $sql_top_produk = "SELECT
                         transaksi ON detailtransaksi.id_transaksi = transaksi.id_transaksi
                     WHERE 
                         transaksi.status = 'selesai'
+                        AND (transaksi.tanggal BETWEEN ? AND ?)
                     GROUP BY 
                         barang.nama_barang 
                     ORDER BY 
                         total_terjual DESC 
                     LIMIT 5"; // Ambil 5 barang terlaris
 
-$result_top_produk = mysqli_query($koneksi, $sql_top_produk);
+$stmt_top = mysqli_prepare($koneksi, $sql_top_produk);
+mysqli_stmt_bind_param($stmt_top, "ss", $filter_tgl_mulai, $filter_tgl_selesai_end);
+mysqli_stmt_execute($stmt_top);
+$result_top_produk = mysqli_stmt_get_result($stmt_top);
+
 $top_products = [];
 while($row = mysqli_fetch_assoc($result_top_produk)) {
     $top_products[] = $row;
@@ -117,8 +127,20 @@ include 'templates/header.php';
 </div>
 
 <div class="card" style="margin-top: 1.5rem;">
-    <div class="card-header">
-        <h3>5 Barang Terlaris (Berdasarkan Total Penjualan)</h3>
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h3>5 Barang Terlaris</h3>
+        <form action="dashboard.php" method="GET" class="filter-form" style="margin-bottom: 0; display: flex; align-items: flex-end; gap: 0.5rem; flex-wrap: wrap; width: auto;">
+            <div class="form-group" style="margin-bottom: 0; min-width: 130px; width: auto;">
+                <label for="chart_tgl_mulai" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Mulai</label>
+                <input type="date" id="chart_tgl_mulai" name="chart_tgl_mulai" value="<?php echo htmlspecialchars($filter_tgl_mulai); ?>" style="padding: 0.45rem 0.75rem; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            </div>
+            <div class="form-group" style="margin-bottom: 0; min-width: 130px; width: auto;">
+                <label for="chart_tgl_selesai" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Selesai</label>
+                <input type="date" id="chart_tgl_selesai" name="chart_tgl_selesai" value="<?php echo htmlspecialchars($filter_tgl_selesai); ?>" style="padding: 0.45rem 0.75rem; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm);">Filter</button>
+            <a href="dashboard.php" class="btn btn-secondary btn-sm" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm);">Reset</a>
+        </form>
     </div>
     <div class="card-body">
         <div class="chart-container">
