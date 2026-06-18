@@ -65,12 +65,26 @@ if (isset($_SESSION['error'])) {
     </div>
 </div>
 
+<?php
+// Konfigurasi pagination
+$limit = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $limit;
+
+// Ambil total data untuk pagination
+$sql_count = "SELECT COUNT(*) AS total FROM stok_masuk WHERE deleted_at IS NULL";
+$res_count = mysqli_query($koneksi, $sql_count);
+$count_data = mysqli_fetch_assoc($res_count);
+$total_rows = $count_data['total'];
+$total_pages = ceil($total_rows / $limit);
+?>
 <div class="card">
     <div class="card-header">
-        <h3>Riwayat Stok Masuk (10 Terakhir)</h3>
+        <h3>Riwayat Stok Masuk</h3>
     </div>
     <div class="card-body">
-        <table class="table">
+        <table class="table table-stok">
             <thead>
                 <tr>
                     <th>Waktu</th>
@@ -82,7 +96,7 @@ if (isset($_SESSION['error'])) {
             </thead>
             <tbody>
                 <?php
-                // Query JOIN untuk riwayat
+                // Query JOIN untuk riwayat dengan LIMIT dan OFFSET
                 $sql_riwayat = "SELECT 
                                     stok_masuk.tanggal_masuk, 
                                     barang.nama_barang, 
@@ -99,19 +113,22 @@ if (isset($_SESSION['error'])) {
                                     stok_masuk.deleted_at IS NULL
                                 ORDER BY 
                                     stok_masuk.id_stok_masuk DESC
-                                LIMIT 10"; // Hanya tampilkan 10 terbaru
+                                LIMIT ? OFFSET ?";
                 
-                $result_riwayat = mysqli_query($koneksi, $sql_riwayat);
+                $stmt_riwayat = mysqli_prepare($koneksi, $sql_riwayat);
+                mysqli_stmt_bind_param($stmt_riwayat, "ii", $limit, $offset);
+                mysqli_stmt_execute($stmt_riwayat);
+                $result_riwayat = mysqli_stmt_get_result($stmt_riwayat);
 
                 if (mysqli_num_rows($result_riwayat) > 0) {
                     while($row = mysqli_fetch_assoc($result_riwayat)) {
                 ?>
                     <tr>
-                        <td><?php echo date('d-m-Y H:i', strtotime($row['tanggal_masuk'])); ?></td>
-                        <td><?php echo htmlspecialchars($row['nama_barang']); ?></td>
-                        <td><?php echo $row['jumlah_masuk']; ?></td>
-                        <td><?php echo htmlspecialchars($row['username']); ?></td>
-                        <td><?php echo htmlspecialchars($row['catatan'] ?? '-'); ?></td>
+                        <td data-label="Waktu"><?php echo date('d-m-Y H:i', strtotime($row['tanggal_masuk'])); ?></td>
+                        <td data-label="Nama Barang"><?php echo htmlspecialchars($row['nama_barang']); ?></td>
+                        <td data-label="Jumlah Masuk"><?php echo $row['jumlah_masuk']; ?></td>
+                        <td data-label="Dicatat Oleh"><?php echo htmlspecialchars($row['username']); ?></td>
+                        <td data-label="Catatan"><?php echo htmlspecialchars($row['catatan'] ?? '-'); ?></td>
                     </tr>
                 <?php
                     }
@@ -121,6 +138,27 @@ if (isset($_SESSION['error'])) {
                 ?>
             </tbody>
         </table>
+
+        <!-- Navigasi Pagination -->
+        <?php if ($total_pages > 1): ?>
+        <div class="pagination">
+            <!-- Tombol Previous -->
+            <a href="stok_masuk.php?page=<?php echo ($page > 1) ? ($page - 1) : 1; ?>" 
+               class="pagination-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>"
+               <?php echo ($page <= 1) ? 'onclick="return false;"' : ''; ?>>&laquo; Prev</a>
+
+            <!-- Nomor Halaman -->
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="stok_masuk.php?page=<?php echo $i; ?>" 
+                   class="pagination-item <?php echo ($page == $i) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+            <?php endfor; ?>
+
+            <!-- Tombol Next -->
+            <a href="stok_masuk.php?page=<?php echo ($page < $total_pages) ? ($page + 1) : $total_pages; ?>" 
+               class="pagination-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>"
+               <?php echo ($page >= $total_pages) ? 'onclick="return false;"' : ''; ?>>Next &raquo;</a>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

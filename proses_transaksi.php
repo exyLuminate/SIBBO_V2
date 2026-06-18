@@ -15,6 +15,14 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     exit;
 }
 
+// Validasi Token CSRF untuk keamanan checkout transaksi
+$csrf_token = $_POST['csrf_token'] ?? '';
+if (empty($csrf_token) || !isset($_SESSION['csrf_token']) || $csrf_token !== $_SESSION['csrf_token']) {
+    $_SESSION['error'] = "Aksi ditolak: Token keamanan CSRF tidak valid atau kedaluwarsa.";
+    header('Location: kasir.php');
+    exit;
+}
+
 // Pastikan keranjang tidak kosong
 if (empty($_SESSION['keranjang'])) {
     $_SESSION['error'] = "Keranjang Anda kosong.";
@@ -88,13 +96,33 @@ if (mysqli_stmt_execute($stmt_transaksi)) {
         $jumlah = (int)$item['jumlah'];
         $subtotal = $harga_saat_transaksi * $jumlah;
 
-        // 2a. INSERT ke detailtransaksi
+        // 2a. VALIDASI & LOCK STOK BARANG (Mencegah stok minus akibat race condition)
+        $sql_cek_stok = "SELECT nama_barang, stok FROM barang WHERE id_barang = ? AND deleted_at IS NULL FOR UPDATE";
+        $stmt_cek = mysqli_prepare($koneksi, $sql_cek_stok);
+        mysqli_stmt_bind_param($stmt_cek, "i", $id_barang);
+        mysqli_stmt_execute($stmt_cek);
+        $res_cek = mysqli_stmt_get_result($stmt_cek);
+        $barang_db = mysqli_fetch_assoc($res_cek);
+
+        if (!$barang_db) {
+            $sukses = false;
+            $_SESSION['error'] = "Barang '" . htmlspecialchars($item['nama']) . "' tidak ditemukan atau telah dihapus.";
+            break;
+        }
+
+        if ($barang_db['stok'] < $jumlah) {
+            $sukses = false;
+            $_SESSION['error'] = "Stok untuk barang '" . htmlspecialchars($item['nama']) . "' tidak mencukupi (Tersedia: {$barang_db['stok']}, Diminta: {$jumlah}).";
+            break;
+        }
+
+        // 2b. INSERT ke detailtransaksi
         $sql_detail = "INSERT INTO detailtransaksi (id_transaksi, id_barang, harga_saat_transaksi, jumlah, subtotal) 
                        VALUES (?, ?, ?, ?, ?)";
         $stmt_detail = mysqli_prepare($koneksi, $sql_detail);
         mysqli_stmt_bind_param(
             $stmt_detail,
-            "iidis", // i, i, d, i, s
+            "iidid", // i, i, d, i, d (diubah dari s menjadi d karena subtotal bertipe DECIMAL/Double)
             $id_transaksi_baru,
             $id_barang,
             $harga_saat_transaksi,
@@ -107,7 +135,7 @@ if (mysqli_stmt_execute($stmt_transaksi)) {
             $_SESSION['error'] = "Gagal menyimpan detail transaksi: " . mysqli_error($koneksi);
         }
 
-        // 2b. UPDATE stok barang (Kurangi stok)
+        // 2c. UPDATE stok barang (Kurangi stok)
         if ($sukses) { // Hanya update stok jika insert detail berhasil
             $sql_stok = "UPDATE barang SET stok = stok - ?, updated_at = NOW() WHERE id_barang = ?";
             $stmt_stok = mysqli_prepare($koneksi, $sql_stok);

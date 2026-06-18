@@ -52,10 +52,13 @@ $judul_halaman = "Detail Transaksi";
 include 'templates/header.php';
 ?>
 
-<div class="card">
+<div class="card print-invoice-card">
     <div class="card-header">
         <h3>Detail Invoice: <?php echo htmlspecialchars($trx['nomor_invoice']); ?></h3>
-        <a href="laporan_transaksi.php" class="btn btn-secondary">Kembali ke Laporan</a>
+        <div class="no-print" style="display: flex; gap: 0.5rem;">
+            <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print"></i> Cetak Struk</button>
+            <a href="laporan_transaksi.php" class="btn btn-secondary">Kembali</a>
+        </div>
     </div>
     <div class="card-body">
         <div class="info-transaksi">
@@ -67,7 +70,7 @@ include 'templates/header.php';
         <hr>
         <h4>Item yang Dibeli:</h4>
         
-        <table class="table">
+        <table class="table table-laporan-detail">
             <thead>
                 <tr>
                     <th>Nama Barang</th>
@@ -101,10 +104,18 @@ include 'templates/header.php';
                 while($item = mysqli_fetch_assoc($result_detail)):
                 ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($item['nama_barang']); ?></td>
-                        <td><?php echo number_format($item['harga_saat_transaksi'], 0, ',', '.'); ?></td>
-                        <td><?php echo $item['jumlah']; ?></td>
-                        <td><?php echo number_format($item['subtotal'], 0, ',', '.'); ?></td>
+                        <td data-label="Nama Barang">
+                            <div class="laporan-detail-info">
+                                <span class="laporan-detail-nama"><?php echo htmlspecialchars($item['nama_barang']); ?></span>
+                                <span class="laporan-detail-meta">
+                                    <small><?php echo number_format($item['harga_saat_transaksi'], 0, ',', '.'); ?> x <?php echo $item['jumlah']; ?></small>
+                                    <span class="laporan-detail-subtotal-mobile">Rp <?php echo number_format($item['subtotal'], 0, ',', '.'); ?></span>
+                                </span>
+                            </div>
+                        </td>
+                        <td data-label="Harga Satuan (Rp)"><?php echo number_format($item['harga_saat_transaksi'], 0, ',', '.'); ?></td>
+                        <td data-label="Jumlah"><?php echo $item['jumlah']; ?></td>
+                        <td data-label="Subtotal (Rp)"><?php echo number_format($item['subtotal'], 0, ',', '.'); ?></td>
                     </tr>
                 <?php endwhile; ?>
             </tbody>

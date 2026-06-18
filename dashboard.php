@@ -40,7 +40,12 @@ $result_total_stok = mysqli_query($koneksi, $sql_total_stok);
 $stats_total_stok = mysqli_fetch_assoc($result_total_stok);
 
 
-// 3. DATA UNTUK CHART (Barang Terlaris)
+// 3. DATA UNTUK CHART (Barang Terlaris dengan Filter Tanggal)
+$filter_tgl_mulai = $_GET['chart_tgl_mulai'] ?? date('Y-m-d', strtotime('-30 days'));
+$filter_tgl_selesai = $_GET['chart_tgl_selesai'] ?? date('Y-m-d');
+
+$filter_tgl_selesai_end = $filter_tgl_selesai . ' 23:59:59';
+
 $sql_top_produk = "SELECT 
                         barang.nama_barang, 
                         SUM(detailtransaksi.jumlah) AS total_terjual 
@@ -52,13 +57,18 @@ $sql_top_produk = "SELECT
                         transaksi ON detailtransaksi.id_transaksi = transaksi.id_transaksi
                     WHERE 
                         transaksi.status = 'selesai'
+                        AND (transaksi.tanggal BETWEEN ? AND ?)
                     GROUP BY 
                         barang.nama_barang 
                     ORDER BY 
                         total_terjual DESC 
                     LIMIT 5"; // Ambil 5 barang terlaris
 
-$result_top_produk = mysqli_query($koneksi, $sql_top_produk);
+$stmt_top = mysqli_prepare($koneksi, $sql_top_produk);
+mysqli_stmt_bind_param($stmt_top, "ss", $filter_tgl_mulai, $filter_tgl_selesai_end);
+mysqli_stmt_execute($stmt_top);
+$result_top_produk = mysqli_stmt_get_result($stmt_top);
+
 $top_products = [];
 while($row = mysqli_fetch_assoc($result_top_produk)) {
     $top_products[] = $row;
@@ -117,8 +127,20 @@ include 'templates/header.php';
 </div>
 
 <div class="card" style="margin-top: 1.5rem;">
-    <div class="card-header">
-        <h3>5 Barang Terlaris (Berdasarkan Total Penjualan)</h3>
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h3>5 Barang Terlaris</h3>
+        <form action="dashboard.php" method="GET" class="filter-form" style="margin-bottom: 0; display: flex; align-items: flex-end; gap: 0.5rem; flex-wrap: wrap; width: auto;">
+            <div class="form-group" style="margin-bottom: 0; min-width: 130px; width: auto;">
+                <label for="chart_tgl_mulai" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Mulai</label>
+                <input type="date" id="chart_tgl_mulai" name="chart_tgl_mulai" value="<?php echo htmlspecialchars($filter_tgl_mulai); ?>" style="padding: 0.45rem 0.75rem; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            </div>
+            <div class="form-group" style="margin-bottom: 0; min-width: 130px; width: auto;">
+                <label for="chart_tgl_selesai" style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Selesai</label>
+                <input type="date" id="chart_tgl_selesai" name="chart_tgl_selesai" value="<?php echo htmlspecialchars($filter_tgl_selesai); ?>" style="padding: 0.45rem 0.75rem; font-size: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm);">Filter</button>
+            <a href="dashboard.php" class="btn btn-secondary btn-sm" style="padding: 0.45rem 1rem; border-radius: var(--radius-sm);">Reset</a>
+        </form>
     </div>
     <div class="card-body">
         <div class="chart-container">
@@ -135,25 +157,39 @@ include 'templates/header.php';
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // Ambil elemen <canvas>
-    const ctx = document.getElementById('myChart');
+    // Ambil elemen <canvas> dan konteks 2D untuk membuat gradient
+    const canvas = document.getElementById('myChart');
+    const ctx = canvas.getContext('2d');
     
     // Ambil data dari PHP
     const labels = <?php echo $labels_chart; ?>;
     const data = <?php echo $data_chart; ?>;
 
+    // Buat gradient background
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    bgGradient.addColorStop(0, 'rgba(99, 102, 241, 0.45)');  // Indigo
+    bgGradient.addColorStop(1, 'rgba(139, 92, 246, 0.05)'); // Violet fading out
+
+    // Buat gradient border
+    const borderGradient = ctx.createLinearGradient(0, 0, 0, 300);
+    borderGradient.addColorStop(0, 'rgba(99, 102, 241, 1)');
+    borderGradient.addColorStop(1, 'rgba(139, 92, 246, 1)');
+
     // Buat chart baru
     new Chart(ctx, {
-        type: 'bar', // Tipe chart: 'bar', 'line', 'pie', etc.
+        type: 'bar',
         data: {
-            labels: labels, // Label X-axis (nama barang)
+            labels: labels,
             datasets: [{
                 label: 'Total Terjual (unit)',
-                data: data, // Data Y-axis (jumlah terjual)
-                backgroundColor: 'rgba(79, 70, 229, 0.15)',
-                borderColor: 'rgba(79, 70, 229, 1)',
+                data: data,
+                backgroundColor: bgGradient,
+                borderColor: borderGradient,
                 borderWidth: 2,
-                borderRadius: 6
+                borderRadius: 8,
+                borderSkipped: false,
+                hoverBackgroundColor: 'rgba(99, 102, 241, 0.6)',
+                hoverBorderColor: 'rgba(99, 102, 241, 1)'
             }]
         },
         options: {
@@ -161,12 +197,27 @@ include 'templates/header.php';
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: '#f1f5f9'
+                        color: 'rgba(226, 232, 240, 0.6)',
+                        drawTicks: false
+                    },
+                    ticks: {
+                        font: {
+                            family: 'Plus Jakarta Sans',
+                            weight: '500'
+                        },
+                        color: '#64748b'
                     }
                 },
                 x: {
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        font: {
+                            family: 'Plus Jakarta Sans',
+                            weight: '600'
+                        },
+                        color: '#64748b'
                     }
                 }
             },
@@ -175,13 +226,32 @@ include 'templates/header.php';
                     labels: {
                         font: {
                             family: 'Plus Jakarta Sans',
-                            weight: '600'
-                        }
+                            weight: '700',
+                            size: 13
+                        },
+                        color: '#0f172a'
                     }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: {
+                        family: 'Plus Jakarta Sans',
+                        weight: '700'
+                    },
+                    bodyFont: {
+                        family: 'Plus Jakarta Sans'
+                    },
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: false
                 }
             },
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            }
         }
     });
 </script>
